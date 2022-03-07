@@ -119,6 +119,32 @@ gcs_path_tempate = YELLOW_GCP_PATH_TEMPLATE
 URL_PREFIX = "https://s3.amazonaws.com/nyc-tlc/trip+data/"
 
 
+GREEN_URL_TEMPALTE = URL_PREFIX + "green_tripdata_{{execution_date.strftime(\'%Y-%m\')}}.csv"
+GREEN_CSV_OUTPUT_FILE_TEMPLATE = path_to_local_home + '/output_{{execution_date.strftime(\'%Y-%m\')}}.csv'
+GREEN_PARQUET_OUTPUT_FILE_TEMPLATE = path_to_local_home + '/output_{{execution_date.strftime(\'%Y-%m\')}}.parquet'
+GREEN_GCP_PATH_TEMPLATE = "raw/green_tripdata/{{execution_date.strftime(\'%Y\')}}/output_{{execution_date.strftime(\'%Y-%m\')}}.parquet"
+
+green_taxi = DAG(
+    dag_id = "green_taxi_data_dag",
+    schedule_interval = "@monthly",
+    default_args = default_args,
+    start_date =datetime(2019,1,1),
+    end_date =datetime(2020,12,31),
+    catchup =  True,
+    max_active_runs = 3,
+    tags = ['dtc-de'],
+)
+
+download_parquetize_upload_dag(dag = green_taxi,
+url_template =GREEN_URL_TEMPALTE ,
+local_csv_path_template = GREEN_CSV_OUTPUT_FILE_TEMPLATE,
+local_parquet_path_template = GREEN_PARQUET_OUTPUT_FILE_TEMPLATE,
+gcs_path_tempate = GREEN_GCP_PATH_TEMPLATE
+)
+
+URL_PREFIX = "https://s3.amazonaws.com/nyc-tlc/trip+data/"
+
+
 ZONES_URL_TEMPALTE = "https://s3.amazonaws.com/nyc-tlc/misc/taxi+_zone_lookup.csv"
 ZONES_CSV_OUTPUT_FILE_TEMPLATE = path_to_local_home + '/output_taxi+_zone_lookup.csv'
 ZONES_PARQUET_OUTPUT_FILE_TEMPLATE = path_to_local_home + '/output_taxi+_zone_lookup.parquet'
